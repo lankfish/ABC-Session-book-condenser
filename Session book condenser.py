@@ -1,17 +1,19 @@
 # -*- coding: utf-8 -*-
-
 #%%Preamble
 
 import re
 import os
 
+#Assumes script is in same directory as desired ABC file
 pythonpath = os.path.dirname(__file__)
 
 #USER INPUTS
 #Filename of file to condense (including .abc)
-infile = "tune_book.abc"
+infile = "folksoc_book.abc"
 #Filename of file to output to (including .abc)
-outfile = "condensed_book.abc"
+outfile = "condensed_book_in_order.abc"
+#Organise for A4 double-sided printing?
+A4_printing = False
 
 #Formatting header
 formathead = ["%%pageheight 10.5cm",
@@ -28,43 +30,81 @@ formathead = ["%%pageheight 10.5cm",
               "%%center Condensed Tunebook \n",
               "<div class=\"abc-file-header\">",
               "%%titlefont Times-roman 20",
-              "</div>\n"]
+              "</div>\n",
+              "%%newpage\n"]
 
 #Section titles
 titlelist = ["\n%%newpage",
-              "X:{tnum}",
+              "X:{xnum}",
               "%%titlefont Times-roman 40",
               "T:{ttitle}",
               "K:\n\n"]
 
 #%%
-out = "\n".join(formathead)
+comped = []
+comped.append("\n".join(formathead))
 valid_starts = ["A:", "B:", "C:", "D:", "F:", "G:", "H:", "K:", "L:", "M:", "m:",
                 "N:", "O:", "P:", "Q:", "R:", "r:", "S:", "s:", "T:", "U:", "W:",
-                "w:", "X:", "Z:"]
+                "w:", "Z:"]
 
 f = open(pythonpath + "\\" + infile)
-file = f.readlines()                 #Open and read file
-header = False     #Is true when dealing with the header of a tune
-title = False      #Is true when dealing with a section title
-num = 1            #tune number, so they remain consistant even with adding section titles
+file = f.readlines()
+header = False
+title = False
+xnum = 1
+ii = 1
 for line in file:
     if line[0:2] == "X:":
-        out += line[0:2] + str(num) + "\n"
-        num += 1
+        comped.append(line[0:2] + str(xnum) + "\n")
         header = True
+        xnum += 1
     elif line[0:2] in valid_starts and header == True:
-        out += line
+        comped[ii] += line
     elif header == True:
-        out += line + "\n"
+        comped[ii] += line + "\n"
         header = False
+        ii += 1
     elif line[0:3] == "%%%":
         title ^= True      #Flips it to the opposite of the current state
-    elif line[0:2] == "% " and title == True:
-        out += "\n".join(titlelist).format(tnum=num, ttitle=line[2:-2])
-        num += 1
+    elif line[0:2] == "% ":
+        if xnum == 1:
+            comped.append("\n".join(titlelist).format(xnum=xnum, ttitle=line[2:-2]))
+        else:
+            comped.append("\n".join(titlelist).format(xnum=xnum, ttitle=line[2:-2]))
+        xnum += 1
+        ii += 1
     else:
         pass
+    
+    
+if A4_printing == True:
+    A6_page = 0
+    num = 0
+    A6_groupings = [[]]
+    for tune in comped:             #Grouping A6 pages together in the knowlegde that four tunes fit per A6 page
+        if "%%newpage" in tune or num >= 3:
+            A6_groupings.append([])
+            A6_groupings[A6_page+1].append(tune)
+            A6_page += 1
+            num = 0
+        elif num < 3:
+            A6_groupings[A6_page].append(tune)
+            num += 1
+    if len(A6_groupings)%8 != 0:
+        for i in range(8-(len(A6_groupings)%8)):
+            A6_groupings.append([])
+    A6_groupings = A6_groupings[1:]
+    A4_order = []
+    A4_page = 0
+    while A4_page*8 + 8 <= len(A6_groupings):
+        for i in [0, 2, 4, 6, 3, 1, 7, 5]:
+            A4_order.append(A6_groupings[A4_page*8 + i])
+        A4_page += 1
+    for i, page in enumerate(A4_order):
+        A4_order[i] = "".join(page)
+    out = "".join(A4_order)
+else:
+    out = "".join(comped)
     
 f = open(pythonpath + "\\" + outfile, "x")
 f.write(out)
