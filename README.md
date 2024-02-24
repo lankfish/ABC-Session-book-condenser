@@ -10,4 +10,4 @@ It also assumes the book is sorted by tune type, where each section is seperated
 %%%%%%%%   
 These section heading starts a new page in the condensed book.
 
-There is an optional part of the script for correctly wrapping the A6 pages for double-sided A4 printing, however it is not very robust, so if you change any of the formatting, it may not work. 
+There is an optional extra script for correctly paginating the A6 pages for double-sided A4 printing. 
