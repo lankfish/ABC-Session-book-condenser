@@ -11,9 +11,7 @@ pythonpath = os.path.dirname(__file__)
 #Filename of file to condense (including .abc)
 infile = "folksoc_book.abc"
 #Filename of file to output to (including .abc)
-outfile = "condensed_book_in_order.abc"
-#Organise for A4 double-sided printing?
-A4_printing = False
+outfile = "condensed_book.abc"
 
 #Formatting header
 formathead = ["%%pageheight 10.5cm",
@@ -75,37 +73,9 @@ for line in file:
         ii += 1
     else:
         pass
-    
-    
-if A4_printing == True:
-    A6_page = 0
-    num = 0
-    A6_groupings = [[]]
-    for tune in comped:             #Grouping A6 pages together in the knowlegde that four tunes fit per A6 page
-        if "%%newpage" in tune or num >= 3:
-            A6_groupings.append([])
-            A6_groupings[A6_page+1].append(tune)
-            A6_page += 1
-            num = 0
-        elif num < 3:
-            A6_groupings[A6_page].append(tune)
-            num += 1
-    if len(A6_groupings)%8 != 0:
-        for i in range(8-(len(A6_groupings)%8)):
-            A6_groupings.append([])
-    A6_groupings = A6_groupings[1:]
-    A4_order = []
-    A4_page = 0
-    while A4_page*8 + 8 <= len(A6_groupings):
-        for i in [0, 2, 4, 6, 3, 1, 7, 5]:
-            A4_order.append(A6_groupings[A4_page*8 + i])
-        A4_page += 1
-    for i, page in enumerate(A4_order):
-        A4_order[i] = "".join(page)
-    out = "".join(A4_order)
-else:
-    out = "".join(comped)
-    
+
+
+out = "".join(comped)
 f = open(pythonpath + "\\" + outfile, "x")
 f.write(out)
 f.close()
