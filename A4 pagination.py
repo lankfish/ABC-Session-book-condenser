@@ -18,7 +18,7 @@ A6_book = PdfReader(pythonpath + "\\" + infile)
 A4_ordered = PdfWriter()
 
 start_page = 0
-while start_page + 7 <= A6_book._get_num_pages():
+while start_page + 7 < A6_book._get_num_pages():
     print(f"starting at p.{start_page}, ending at p.{start_page+7}")
     for num in [0, 2, 4, 6, 3, 1, 7, 5]:
         A4_ordered.add_page(A6_book.pages[start_page + num])
